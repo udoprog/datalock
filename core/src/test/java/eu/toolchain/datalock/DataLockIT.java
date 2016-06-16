@@ -87,16 +87,21 @@ public class DataLockIT {
                 keyFilter(Operator.EQUAL, e1.getKey().get())))
             .build();
 
-        client.transaction().thenCompose(t -> t.runQuery(q).thenCompose(results -> {
-            final Entity entity = results.getEntities().get(0);
+        client
+            .transaction()
+            .thenCompose(t -> t
+                .runQuery(q)
+                .thenCombine(t.lookup(ImmutableList.of(e1.getKey().get())), (results, entities) -> {
+                    final Entity entity = results.getEntities().get(0);
 
-            final A a = encoding.decodeEntity(entity);
+                    final A a = encoding.decodeEntity(entity);
 
-            final Mutation m = update(
-                encoding.encodeEntity(a.withAge(a.getAge() + 1)).withKey(entity.getKey().get()));
-
-            return t.commit(ImmutableList.of(m));
-        })).get();
+                    return ImmutableList.of(update(encoding
+                        .encodeEntity(a.withAge(a.getAge() + 1))
+                        .withKey(entity.getKey().get())));
+                })
+                .thenCompose(t::commit))
+            .get();
 
         final RunQueryResponse results = client.runQuery(q).get();
         final A a = encoding.decodeEntity(results.getEntities().get(0));

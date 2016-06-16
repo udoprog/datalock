@@ -9,4 +9,6 @@ public interface TransactionClient {
     CompletableFuture<TransactionResult> commit(List<Mutation> mutations);
 
     CompletableFuture<RunQueryResponse> runQuery(Query query);
+
+    CompletableFuture<LookupResponse> lookup(List<Key> keys);
 }

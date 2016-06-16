@@ -39,6 +39,7 @@ public class DataLockClient {
     private final Call.Factory client;
     private final String url;
     private final Optional<PartitionId> partitionId;
+    private final String projectId;
     private final Optional<Credential> credential;
     private final ScheduledExecutorService scheduler;
 
@@ -58,6 +59,7 @@ public class DataLockClient {
         this.client = client;
         this.url = String.format("%s/%s/projects/%s", url, API_VERSION, projectId);
         this.partitionId = Optional.of(buildPartitionId(namespaceId, projectId));
+        this.projectId = projectId;
         this.credential = credential;
         this.scheduler = scheduler;
 
@@ -353,6 +355,19 @@ public class DataLockClient {
             AllocateIdsResponse::fromPb);
     }
 
+    public CompletableFuture<LookupResponse> lookup(final List<Key> keys) {
+        return lookup(keys, Optional.empty());
+    }
+
+    public CompletableFuture<LookupResponse> lookup(
+        final List<Key> keys, final Optional<ReadOptions> readOptions
+    ) {
+        final LookupRequest request = new LookupRequest(keys, readOptions, projectId);
+
+        return request("lookup", request.toPb(),
+            com.google.datastore.v1beta3.LookupResponse::parseFrom, LookupResponse::fromPb);
+    }
+
     /**
      * High-level transactional client API.
      */
@@ -373,6 +388,12 @@ public class DataLockClient {
             @Override
             public CompletableFuture<RunQueryResponse> runQuery(final Query query) {
                 return DataLockClient.this.runQuery(query,
+                    Optional.of(ReadOptions.fromTransaction(txn)));
+            }
+
+            @Override
+            public CompletableFuture<LookupResponse> lookup(final List<Key> keys) {
+                return DataLockClient.this.lookup(keys,
                     Optional.of(ReadOptions.fromTransaction(txn)));
             }
         });
