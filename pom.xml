@@ -10,6 +10,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>googleapis/maven</module>
     <module>api</module>
     <module>core</module>
     <module>databind</module>
@@ -131,7 +132,6 @@
         <artifactId>datalock-databind</artifactId>
         <version>${project.version}</version>
       </dependency>
-
 
       <dependency>
         <groupId>eu.toolchain.ogt</groupId>

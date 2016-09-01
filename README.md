@@ -1,6 +1,6 @@
 # The DataLock Client
 
-This intends to be a Datastore v1beta3 compatible client.
+This intends to be a Datastore gRPC V1 compatible client.
 
 * Based on Java 8 and CompletableFuture's.
 * The client is fully asynchronous.
@@ -8,19 +8,28 @@ This intends to be a Datastore v1beta3 compatible client.
 * Dynamic field values are encapsulated to allow for type-safe and efficient
   processing using the [visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern).
 * Flexible reflection-based databinding, that also works with immutable types.
-  This is based on [tiny-ogt](https://github.com/udoprog/tiny-ogt).
+  This is based on [scribe](https://github.com/udoprog/scribe).
+* Does not export problematic transitive dependencies (i.e. protobuf and gRPC)
+  instead, these are bundled in a separate package.
 
 This is currently an **Alpha** project.
 
 # Building
 
-**Alpha Notice:** You have to download and install [Tiny-OGT](https://github.com/udoprog/tiny-ogt) to build this project.
+This project currently depends on an un-published version of
+[googleapis](googleapis). This must be prepared using the `prepare` command.
 
-This project is built using Maven:
+```
+$> ./prepare
+```
+
+After that, this project is built using Maven.
 
 ```
 $> mvn package
 ```
+
+[googleapis]: https://github.com/googleapis/googleapis
 
 # Testing
 

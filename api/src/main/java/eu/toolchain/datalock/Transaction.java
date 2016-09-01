@@ -5,5 +5,5 @@ import lombok.Data;
 
 @Data
 public class Transaction {
-    private final ByteString bytes;
+  private final ByteString bytes;
 }

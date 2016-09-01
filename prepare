@@ -1,0 +1,4 @@
+#!/bin/bash
+
+git clone https://github.com/udoprog/googleapis ./googleapis
+./googleapis/maven/prepare

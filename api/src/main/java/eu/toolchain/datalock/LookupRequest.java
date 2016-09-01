@@ -7,16 +7,15 @@ import java.util.Optional;
 
 @Data
 public class LookupRequest {
-    private final List<Key> keys;
-    private final Optional<ReadOptions> readOptions;
-    private final String projectId;
+  private final List<Key> keys;
+  private final Optional<ReadOptions> readOptions;
 
-    public com.google.datastore.v1beta3.LookupRequest toPb() {
-        final com.google.datastore.v1beta3.LookupRequest.Builder builder =
-            com.google.datastore.v1beta3.LookupRequest.newBuilder();
-        keys.stream().map(Key::toPb).forEach(builder::addKeys);
-        readOptions.ifPresent(r -> builder.setReadOptions(r.toPb()));
-        builder.setProjectId(projectId);
-        return builder.build();
-    }
+  public com.google.datastore.v1.LookupRequest toPb(final String projectId) {
+    final com.google.datastore.v1.LookupRequest.Builder builder =
+        com.google.datastore.v1.LookupRequest.newBuilder();
+    builder.setProjectId(projectId);
+    keys.stream().map(Key::toPb).forEach(builder::addKeys);
+    readOptions.ifPresent(r -> builder.setReadOptions(r.toPb()));
+    return builder.build();
+  }
 }
