@@ -8,7 +8,7 @@ This intends to be a Datastore v1beta3 compatible client.
 * Dynamic field values are encapsulated to allow for type-safe and efficient
   processing using the [visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern).
 * Flexible reflection-based databinding, that also works with immutable types.
-  This is based on [tiny-ogt](https://github.com/udoprog/tiny-ogt).
+  This is based on [scribe](https://github.com/udoprog/scribe).
 
 This is currently an **Alpha** project.
 

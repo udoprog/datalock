@@ -3,7 +3,7 @@ package eu.toolchain.datalock;
 import java.util.List;
 
 public interface TransactionResult {
-    List<MutationResult> mutationResult();
+  List<MutationResult> mutationResult();
 
-    boolean isCommited();
+  boolean isCommited();
 }

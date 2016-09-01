@@ -11,11 +11,15 @@
 
   <artifactId>datalock-api</artifactId>
 
+  <properties>
+    <datastore.version>1.0.1</datastore.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.cloud.datastore</groupId>
-      <artifactId>datastore-v1beta3-protos</artifactId>
-      <version>1.0.0-beta</version>
+      <artifactId>datastore-v1-protos</artifactId>
+      <version>${datastore.version}</version>
     </dependency>
 
     <dependency>

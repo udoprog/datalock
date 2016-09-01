@@ -11,6 +11,10 @@
 
   <artifactId>datalock-databind</artifactId>
 
+  <properties>
+    <scribe.version>0.2.0</scribe.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>eu.toolchain.datalock</groupId>
@@ -18,9 +22,9 @@
     </dependency>
 
     <dependency>
-      <groupId>eu.toolchain.ogt</groupId>
-      <artifactId>tiny-ogt-api</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <groupId>eu.toolchain.scribe</groupId>
+      <artifactId>scribe-databind</artifactId>
+      <version>${scribe.version}</version>
     </dependency>
 
     <dependency>

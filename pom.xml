@@ -132,7 +132,6 @@
         <version>${project.version}</version>
       </dependency>
 
-
       <dependency>
         <groupId>eu.toolchain.ogt</groupId>
         <artifactId>tiny-ogt-api</artifactId>
