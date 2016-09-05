@@ -28,8 +28,8 @@ public class DataLockIT {
 
   private PathElement org;
 
-  private KeyedEntity e1;
-  private KeyedEntity e2;
+  private Entity.KeyedEntity e1;
+  private Entity.KeyedEntity e2;
 
   @Before
   public void setup() throws Exception {
@@ -84,7 +84,7 @@ public class DataLockIT {
         .thenCompose(t -> t
             .runQuery(q)
             .thenCombine(t.lookup(ImmutableList.of(e1.getKey())), (results, entities) -> {
-              final KeyedEntity entity = results.getEntities().get(0);
+              final Entity.KeyedEntity entity = results.getEntities().get(0);
 
               final A a = encoding.decodeEntity(entity);
 

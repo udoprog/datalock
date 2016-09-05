@@ -2,6 +2,7 @@ package eu.toolchain.datalock;
 
 import com.google.datastore.v1.DatastoreGrpc;
 import io.grpc.ManagedChannel;
+import io.grpc.internal.DnsNameResolverProvider;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
@@ -409,6 +410,7 @@ public class DataLockClientImpl implements DatalockClient {
       final NettyChannelBuilder builder = NettyChannelBuilder.forAddress(host, port);
 
       builder.userAgent(USER_AGENT);
+      builder.nameResolverFactory(DnsNameResolverProvider.asFactory());
 
       usePlainText.ifPresent(builder::usePlaintext);
 

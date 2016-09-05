@@ -10,8 +10,6 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>googleapis/maven</module>
-    <module>api</module>
     <module>core</module>
     <module>databind</module>
   </modules>
@@ -129,7 +127,7 @@
 
       <dependency>
         <groupId>eu.toolchain.datalock</groupId>
-        <artifactId>datalock-api</artifactId>
+        <artifactId>datalock-core</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -137,6 +135,12 @@
         <groupId>eu.toolchain.datalock</groupId>
         <artifactId>datalock-databind</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.googleapis</groupId>
+        <artifactId>googleapis</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

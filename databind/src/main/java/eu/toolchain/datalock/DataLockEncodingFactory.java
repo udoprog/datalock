@@ -174,7 +174,7 @@ public class DataLockEncodingFactory implements EncoderFactory<Value>, DecoderFa
           final Value.EntityValue entity
       ) {
         final Entity e = entity.getEntity();
-        final Optional<Key> key = e.asKeyed().map(KeyedEntity::getKey);
+        final Optional<Key> key = e.asKeyed().map(Entity.KeyedEntity::getKey);
 
         return Decoded.of(new DataLockEntityFieldsDecoder(
             () -> key.map(Decoded::of).orElseGet(Decoded::absent).map(Value::fromKey),

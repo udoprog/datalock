@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DataLockEntityFieldsEncoder implements EntityFieldsEncoder<Value> {
-  final KeyedEntity.Builder object = KeyedEntity.builder();
+  final Entity.KeyedEntity.Builder object = Entity.KeyedEntity.builder();
 
   private static final Value.Visitor<Key> TO_KEY = new Value.Visitor<Key>() {
     @Override
