@@ -2,7 +2,7 @@ package eu.toolchain.datalock;
 
 import com.google.datastore.v1.DatastoreGrpc;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
@@ -406,7 +406,7 @@ public class DataLockClientImpl implements DatalockClient {
       final String host = this.host.orElse(DEFAULT_HOST);
       final int port = this.port.orElse(DEFAULT_PORT);
 
-      final ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forAddress(host, port);
+      final NettyChannelBuilder builder = NettyChannelBuilder.forAddress(host, port);
 
       builder.userAgent(USER_AGENT);
 
