@@ -3,34 +3,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>eu.toolchain.datalock</groupId>
-    <artifactId>datalock-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
+  <groupId>eu.toolchain.datalock</groupId>
+  <artifactId>datalock-tests</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
 
-  <artifactId>datalock-databind</artifactId>
-
-  <properties>
-    <scribe.version>0.2.0</scribe.version>
-  </properties>
+  <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
-      <groupId>eu.toolchain.datalock</groupId>
-      <artifactId>datalock-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>eu.toolchain.scribe</groupId>
-      <artifactId>scribe-databind</artifactId>
-      <version>${scribe.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>1.16.8</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>eu.toolchain.datalock</groupId>
+      <artifactId>datalock-databind</artifactId>
+      <version>0.1.0</version>
     </dependency>
 
     <dependency>
@@ -47,4 +37,18 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.2</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

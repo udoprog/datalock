@@ -2,7 +2,8 @@ package eu.toolchain.datalock;
 
 import com.google.datastore.v1.DatastoreGrpc;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.internal.DnsNameResolverProvider;
+import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,9 +22,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public class DataLockClientImpl implements DatalockClient {
+public class CoreDatalockClient implements DatalockClient {
   public static final String API_VERSION = "v1";
-  public static final String USER_AGENT = DataLockClientImpl.class.getCanonicalName() + " (gzip)";
+  public static final String USER_AGENT = CoreDatalockClient.class.getCanonicalName() + " (gzip)";
 
   private final Object lock = new Object();
 
@@ -41,7 +42,7 @@ public class DataLockClientImpl implements DatalockClient {
 
   private final CompletableFuture<Void> stoppedFuture;
 
-  private DataLockClientImpl(
+  private CoreDatalockClient(
       final DatastoreGrpc.DatastoreStub client, final ManagedChannel channel,
       final String namespaceId, final String projectId, final Optional<Credential> credential,
       final ScheduledExecutorService scheduler
@@ -98,13 +99,6 @@ public class DataLockClientImpl implements DatalockClient {
   }
 
   @Override
-  public CompletableFuture<TransactionResult> commit(
-      final List<Mutation> mutations, final Transaction transaction
-  ) {
-    return commit(mutations, Optional.of(transaction));
-  }
-
-  @Override
   public CompletableFuture<TransactionResult> commit(final List<Mutation> mutations) {
     return commit(mutations, Optional.empty());
   }
@@ -146,12 +140,12 @@ public class DataLockClientImpl implements DatalockClient {
 
   @Override
   public CompletableFuture<LookupResponse> lookup(final List<Key> keys) {
-    return lookup(keys, Optional.empty());
+    return lookup(keys, ReadOptions.defaultInstance());
   }
 
   @Override
   public CompletableFuture<LookupResponse> lookup(
-      final List<Key> keys, final Optional<ReadOptions> readOptions
+      final List<Key> keys, final ReadOptions readOptions
   ) {
     final LookupRequest request = new LookupRequest(keys, readOptions);
 
@@ -164,24 +158,24 @@ public class DataLockClientImpl implements DatalockClient {
     return beginTransaction().thenApply((final Transaction txn) -> new TransactionClient() {
       @Override
       public CompletableFuture<TransactionResult> rollback() {
-        return DataLockClientImpl.this.rollback(txn);
+        return CoreDatalockClient.this.rollback(txn);
       }
 
       @Override
       public CompletableFuture<TransactionResult> commit(
           final List<Mutation> mutations
       ) {
-        return DataLockClientImpl.this.commit(mutations, txn);
+        return CoreDatalockClient.this.commit(mutations, Optional.of(txn));
       }
 
       @Override
       public CompletableFuture<RunQueryResponse> runQuery(final Query query) {
-        return DataLockClientImpl.this.runQuery(query, ReadOptions.fromTransaction(txn));
+        return CoreDatalockClient.this.runQuery(query, ReadOptions.fromTransaction(txn));
       }
 
       @Override
       public CompletableFuture<LookupResponse> lookup(final List<Key> keys) {
-        return DataLockClientImpl.this.lookup(keys, Optional.of(ReadOptions.fromTransaction(txn)));
+        return CoreDatalockClient.this.lookup(keys, ReadOptions.fromTransaction(txn));
       }
     });
   }
@@ -402,13 +396,14 @@ public class DataLockClientImpl implements DatalockClient {
       return this;
     }
 
-    public DataLockClientImpl build() {
+    public CoreDatalockClient build() {
       final String host = this.host.orElse(DEFAULT_HOST);
       final int port = this.port.orElse(DEFAULT_PORT);
 
-      final ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forAddress(host, port);
+      final NettyChannelBuilder builder = NettyChannelBuilder.forAddress(host, port);
 
       builder.userAgent(USER_AGENT);
+      builder.nameResolverFactory(new DnsNameResolverProvider());
 
       usePlainText.ifPresent(builder::usePlaintext);
 
@@ -422,7 +417,7 @@ public class DataLockClientImpl implements DatalockClient {
       final ScheduledExecutorService scheduler =
           this.scheduler.orElseGet(Executors::newSingleThreadScheduledExecutor);
 
-      return new DataLockClientImpl(client, channel, namespaceId, projectId, credential, scheduler);
+      return new CoreDatalockClient(client, channel, namespaceId, projectId, credential, scheduler);
     }
   }
 }

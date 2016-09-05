@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public interface DatalockClient {
+public interface DatalockClient extends Client {
   /**
    * Start the client.
    *
@@ -22,7 +22,7 @@ public interface DatalockClient {
   /**
    * Rollback a given transaction.
    * <p>
-   * You normally rollback a transaction in the event of d DataLockClientImpl failure.
+   * You normally rollback a transaction in the event of d CoreDatalockClient failure.
    *
    * @param txn the transaction.
    * @return the result of the rollback request.
@@ -37,24 +37,10 @@ public interface DatalockClient {
    * @return A commit response.
    */
   CompletableFuture<TransactionResult> commit(
-      List<Mutation> mutations, Transaction transaction
-  );
-
-  /**
-   * List of mutations to commit.
-   *
-   * @param mutations Mutations to commit.
-   * @return A future containing the result of the transaction.
-   */
-  CompletableFuture<TransactionResult> commit(List<Mutation> mutations);
-
-  CompletableFuture<RunQueryResponse> runQuery(Query query);
-
-  CompletableFuture<RunQueryResponse> runQuery(Query query, ReadOptions readOptions);
-
-  CompletableFuture<TransactionResult> commit(
       List<Mutation> mutations, Optional<Transaction> transaction
   );
+
+  CompletableFuture<RunQueryResponse> runQuery(Query query, ReadOptions readOptions);
 
   /**
    * Execute a allocate ids statement.
@@ -63,11 +49,7 @@ public interface DatalockClient {
    */
   CompletableFuture<AllocateIdsResponse> allocateIds(List<Key> keys);
 
-  CompletableFuture<LookupResponse> lookup(List<Key> keys);
-
-  CompletableFuture<LookupResponse> lookup(
-      List<Key> keys, Optional<ReadOptions> readOptions
-  );
+  CompletableFuture<LookupResponse> lookup(List<Key> keys, ReadOptions readOptions);
 
   /**
    * High-level transactional client API.

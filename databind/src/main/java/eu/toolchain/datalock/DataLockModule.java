@@ -1,6 +1,5 @@
 package eu.toolchain.datalock;
 
-import com.google.datastore.v1.Key;
 import eu.toolchain.scribe.EncodedMapping;
 import eu.toolchain.scribe.EntityMapperBuilder;
 import eu.toolchain.scribe.Module;

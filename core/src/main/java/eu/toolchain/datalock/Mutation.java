@@ -9,15 +9,15 @@ public interface Mutation {
     return new DeleteMutation(key);
   }
 
-  static Mutation insert(final KeyedEntity entity) {
+  static Mutation insert(final Entity.KeyedEntity entity) {
     return new InsertMutation(entity);
   }
 
-  static Mutation upsert(final KeyedEntity entity) {
+  static Mutation upsert(final Entity.KeyedEntity entity) {
     return new UpsertMutation(entity);
   }
 
-  static Mutation update(KeyedEntity entity) {
+  static Mutation update(Entity.KeyedEntity entity) {
     return new UpdateMutation(entity);
   }
 
@@ -36,7 +36,7 @@ public interface Mutation {
 
   @Data
   class InsertMutation implements Mutation {
-    private final KeyedEntity entity;
+    private final Entity.KeyedEntity entity;
 
     @Override
     public com.google.datastore.v1.Mutation toPb() {
@@ -49,7 +49,7 @@ public interface Mutation {
 
   @Data
   class UpsertMutation implements Mutation {
-    private final KeyedEntity entity;
+    private final Entity.KeyedEntity entity;
 
     @Override
     public com.google.datastore.v1.Mutation toPb() {
@@ -62,7 +62,7 @@ public interface Mutation {
 
   @Data
   class UpdateMutation implements Mutation {
-    private final KeyedEntity entity;
+    private final Entity.KeyedEntity entity;
 
     @Override
     public com.google.datastore.v1.Mutation toPb() {
