@@ -6,14 +6,11 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public interface Value {
   boolean excludeFromIndexes();
 
   Value withExcludeFromIndexes(boolean excludeFromIndexes);
-
-  com.google.datastore.v1.Value toPb();
 
   <T> T visit(Visitor<T> visitor);
 
@@ -108,40 +105,6 @@ public interface Value {
       final List<Value> values, final boolean excludeFromIndexes
   ) {
     return new ArrayValue(values, excludeFromIndexes);
-  }
-
-  static Value fromPb(final com.google.datastore.v1.Value pb) {
-    final boolean excludeFromIndexes = pb.getExcludeFromIndexes();
-
-    final com.google.datastore.v1.Value.ValueTypeCase c = pb.getValueTypeCase();
-
-    switch (c) {
-      case KEY_VALUE:
-        return new KeyValue(Key.fromPb(pb.getKeyValue()), excludeFromIndexes);
-      case STRING_VALUE:
-        return new StringValue(pb.getStringValue(), excludeFromIndexes);
-      case BLOB_VALUE:
-        return new BlobValue(pb.getBlobValue(), excludeFromIndexes);
-      case TIMESTAMP_VALUE:
-        return TimestampValue.fromPb(pb.getTimestampValue(), excludeFromIndexes);
-      case INTEGER_VALUE:
-        return new IntegerValue(pb.getIntegerValue(), excludeFromIndexes);
-      case DOUBLE_VALUE:
-        return new DoubleValue(pb.getDoubleValue(), excludeFromIndexes);
-      case BOOLEAN_VALUE:
-        return new BooleanValue(pb.getBooleanValue(), excludeFromIndexes);
-      case ARRAY_VALUE:
-        return new ArrayValue(pb
-            .getArrayValue()
-            .getValuesList()
-            .stream()
-            .map(Value::fromPb)
-            .collect(Collectors.toList()));
-      case NULL_VALUE:
-        return NullValue.INSTANCE;
-      default:
-        throw new IllegalArgumentException("Unsupported case: " + c);
-    }
   }
 
   @Data

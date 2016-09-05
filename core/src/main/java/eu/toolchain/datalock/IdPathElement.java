@@ -22,8 +22,8 @@ public class IdPathElement implements PathElement {
   }
 
   @Override
-  public com.google.datastore.v1.Key.PathElement toPb() {
-    return com.google.datastore.v1.Key.PathElement.newBuilder().setKind(kind).setId(id).build();
+  public <T> T visit(final Visitor<? extends T> visitor) {
+    return visitor.visitIdPathElement(this);
   }
 
   @Override

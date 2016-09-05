@@ -6,27 +6,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class Entity {
-  public abstract Map<String, Value> getProperties();
+public interface Entity {
+  Map<String, Value> getProperties();
 
-  public abstract com.google.datastore.v1.Entity toPb();
+  com.google.datastore.v1.Entity toPb();
 
-  public abstract KeyedEntity withKey(final Key key);
+  KeyedEntity withKey(Key key);
 
-  public abstract Optional<KeyedEntity> asKeyed();
+  Optional<KeyedEntity> asKeyed();
 
-  public static Builder builder() {
+  <T> T visit(Visitor<? extends T> visitor);
+
+  static Builder builder() {
     return new Builder();
   }
 
-  public static class Builder {
-    private Optional<Key> key = Optional.empty();
+  class Builder {
     private Map<String, Value> properties = new HashMap<>();
-
-    public Builder key(final Key key) {
-      this.key = Optional.of(key);
-      return this;
-    }
 
     public Builder property(final String name, final Value value) {
       this.properties.put(name, value);
@@ -46,8 +42,14 @@ public abstract class Entity {
     }
   }
 
+  interface Visitor<T> {
+    T visitEmbedded(final EmbeddedEntity embedded);
+
+    T visitKeyed(final KeyedEntity keyed);
+  }
+
   @Data
-  public static class EmbeddedEntity extends Entity {
+  class EmbeddedEntity implements Entity {
     private final Map<String, Value> properties;
 
     public Optional<Value> get(final String name) {
@@ -68,6 +70,11 @@ public abstract class Entity {
       return Optional.empty();
     }
 
+    @Override
+    public <T> T visit(final Visitor<? extends T> visitor) {
+      return visitor.visitEmbedded(this);
+    }
+
     public static EmbeddedEntity fromPb(final com.google.datastore.v1.Entity pb) {
       final Map<String, Value> properties = new HashMap<>();
 
@@ -85,21 +92,10 @@ public abstract class Entity {
 
       return new EmbeddedEntity(properties);
     }
-
-    public com.google.datastore.v1.Entity toPb() {
-      final com.google.datastore.v1.Entity.Builder builder =
-          com.google.datastore.v1.Entity.newBuilder();
-
-      for (final Map.Entry<String, Value> e : properties.entrySet()) {
-        builder.getMutableProperties().put(e.getKey(), e.getValue().toPb());
-      }
-
-      return builder.build();
-    }
   }
 
   @Data
-  public static class KeyedEntity extends Entity {
+  class KeyedEntity implements Entity {
     private final Key key;
     private final Map<String, Value> properties;
 
@@ -125,7 +121,12 @@ public abstract class Entity {
       return Optional.of(this);
     }
 
-    public static KeyedEntity fromPb(final com.google.datastore.v1.Entity pb) {
+    @Override
+    public <T> T visit(final Visitor<? extends T> visitor) {
+      return visitor.visitKeyed(this);
+    }
+
+    public void stuff() {
       final Map<String, Value> properties = new HashMap<>();
 
       if (!pb.hasKey()) {
@@ -141,19 +142,6 @@ public abstract class Entity {
       }
 
       return new KeyedEntity(key, properties);
-    }
-
-    public com.google.datastore.v1.Entity toPb() {
-      final com.google.datastore.v1.Entity.Builder builder =
-          com.google.datastore.v1.Entity.newBuilder();
-
-      builder.setKey(key.toPb());
-
-      for (final Map.Entry<String, Value> e : properties.entrySet()) {
-        builder.getMutableProperties().put(e.getKey(), e.getValue().toPb());
-      }
-
-      return builder.build();
     }
   }
 }

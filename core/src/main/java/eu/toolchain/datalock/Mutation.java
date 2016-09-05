@@ -3,7 +3,7 @@ package eu.toolchain.datalock;
 import lombok.Data;
 
 public interface Mutation {
-  com.google.datastore.v1.Mutation toPb();
+  <T> T visit(Visitor<? extends T> visitor);
 
   static Mutation delete(final Key key) {
     return new DeleteMutation(key);
@@ -21,16 +21,23 @@ public interface Mutation {
     return new UpdateMutation(entity);
   }
 
+  interface Visitor<T> {
+    T visitDelete(DeleteMutation delete);
+
+    T visitInsert(InsertMutation insert);
+
+    T visitUpsert(UpsertMutation upsert);
+
+    T visitUpdate(UpdateMutation update);
+  }
+
   @Data
   class DeleteMutation implements Mutation {
     private final Key key;
 
     @Override
-    public com.google.datastore.v1.Mutation toPb() {
-      final com.google.datastore.v1.Mutation.Builder builder =
-          com.google.datastore.v1.Mutation.newBuilder();
-      builder.setDelete(key.toPb());
-      return builder.build();
+    public <T> T visit(final Visitor<? extends T> visitor) {
+      return visitor.visitDelete(this);
     }
   }
 
@@ -39,11 +46,8 @@ public interface Mutation {
     private final Entity.KeyedEntity entity;
 
     @Override
-    public com.google.datastore.v1.Mutation toPb() {
-      final com.google.datastore.v1.Mutation.Builder builder =
-          com.google.datastore.v1.Mutation.newBuilder();
-      builder.setInsert(entity.toPb());
-      return builder.build();
+    public <T> T visit(final Visitor<? extends T> visitor) {
+      return visitor.visitInsert(this);
     }
   }
 
@@ -52,11 +56,8 @@ public interface Mutation {
     private final Entity.KeyedEntity entity;
 
     @Override
-    public com.google.datastore.v1.Mutation toPb() {
-      final com.google.datastore.v1.Mutation.Builder builder =
-          com.google.datastore.v1.Mutation.newBuilder();
-      builder.setUpsert(entity.toPb());
-      return builder.build();
+    public <T> T visit(final Visitor<? extends T> visitor) {
+      return visitor.visitUpsert(this);
     }
   }
 
@@ -65,11 +66,8 @@ public interface Mutation {
     private final Entity.KeyedEntity entity;
 
     @Override
-    public com.google.datastore.v1.Mutation toPb() {
-      final com.google.datastore.v1.Mutation.Builder builder =
-          com.google.datastore.v1.Mutation.newBuilder();
-      builder.setUpdate(entity.toPb());
-      return builder.build();
+    public <T> T visit(final Visitor<? extends T> visitor) {
+      return visitor.visitUpdate(this);
     }
   }
 }

@@ -5,7 +5,7 @@ public interface PathElement {
 
   boolean isComplete();
 
-  com.google.datastore.v1.Key.PathElement toPb();
+  <T> T visit(Visitor<? extends T> visitor);
 
   static PathElement element(final String kind) {
     return new IncompletePathElement(kind);
@@ -19,16 +19,11 @@ public interface PathElement {
     return new IdPathElement(kind, id);
   }
 
-  static PathElement fromPb(final com.google.datastore.v1.Key.PathElement pb) {
-    final String kind = pb.getKind();
+  interface Visitor<T> {
+    T visitIdPathElement(IdPathElement idPathElement);
 
-    switch (pb.getIdTypeCase()) {
-      case ID:
-        return new IdPathElement(kind, pb.getId());
-      case NAME:
-        return new NamePathElement(kind, pb.getName());
-      default:
-        return new IncompletePathElement(kind);
-    }
+    T visitNamePathElement(NamePathElement namePathElement);
+
+    T visitIncompletePathElement(IncompletePathElement incompletePathElement);
   }
 }

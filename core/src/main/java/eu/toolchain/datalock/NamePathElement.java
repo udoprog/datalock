@@ -22,8 +22,8 @@ public class NamePathElement implements PathElement {
   }
 
   @Override
-  public com.google.datastore.v1.Key.PathElement toPb() {
-    return com.google.datastore.v1.Key.PathElement.newBuilder().setKind(kind).setName(name).build();
+  public <T> T visit(final Visitor<? extends T> visitor) {
+    return visitor.visitNamePathElement(this);
   }
 
   @Override
