@@ -15,12 +15,7 @@ public class PropertyOrder {
     return new PropertyOrder(field, direction);
   }
 
-  public com.google.datastore.v1.PropertyOrder toPb() {
-    final com.google.datastore.v1.PropertyOrder.Builder builder =
-        com.google.datastore.v1.PropertyOrder.newBuilder();
-    builder.setProperty(
-        com.google.datastore.v1.PropertyReference.newBuilder().setName(field).build());
-    builder.setDirection(direction.direction());
-    return builder.build();
+  public enum Direction {
+    ASCENDING, DESCENDING;
   }
 }

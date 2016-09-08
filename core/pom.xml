@@ -13,6 +13,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>eu.toolchain.datalock</groupId>
+      <artifactId>datalock-api</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.googleapis</groupId>
       <artifactId>googleapis-datastore-v1</artifactId>
     </dependency>

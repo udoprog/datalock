@@ -10,6 +10,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>api</module>
     <module>core</module>
     <module>databind</module>
   </modules>
@@ -124,6 +125,12 @@
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>1.16.8</version>
+      </dependency>
+
+      <dependency>
+        <groupId>eu.toolchain.datalock</groupId>
+        <artifactId>datalock-api</artifactId>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>

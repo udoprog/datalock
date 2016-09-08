@@ -1,11 +1,6 @@
 package eu.toolchain.datalock;
 
 import com.google.datastore.v1.DatastoreGrpc;
-import io.grpc.ManagedChannel;
-import io.grpc.internal.DnsNameResolverProvider;
-import io.grpc.netty.NettyChannelBuilder;
-import io.grpc.stub.StreamObserver;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +15,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import io.grpc.ManagedChannel;
+import io.grpc.internal.DnsNameResolverProvider;
+import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CoreDatalockClient implements DatalockClient {
@@ -41,6 +42,24 @@ public class CoreDatalockClient implements DatalockClient {
   private volatile String accessToken = null;
 
   private final CompletableFuture<Void> stoppedFuture;
+
+  private final Protobuf.RollbackRequestToProto rollbackRequest;
+  private final Protobuf.RollbackResponseFromProto rollbackResponse;
+
+  private final Protobuf.RunQueryRequestToProto runQueryRequest;
+  private final Protobuf.RunQueryResponseFromProto runQueryResponse;
+
+  private final Protobuf.CommitRequestToProto commitRequest;
+  private final Protobuf.CommitResponseFromProto commitResponse;
+
+  private final Protobuf.AllocateIdsRequestToProto allocateIdsRequest;
+  private final Protobuf.AllocateIdsResponseFromProto allocateIdsResponse;
+
+  private final Protobuf.LookupRequestToProto lookupRequest;
+  private final Protobuf.LookupResponseFromProto lookupResponse;
+
+  private final Protobuf.BeginTransactionRequestToProto beginTransactionRequest;
+  private final Protobuf.BeginTransactionResponseFromProto beginTransactionResponse;
 
   private CoreDatalockClient(
       final DatastoreGrpc.DatastoreStub client, final ManagedChannel channel,
@@ -66,6 +85,24 @@ public class CoreDatalockClient implements DatalockClient {
       // todo shutdown
       return null;
     }, scheduler);
+
+    this.rollbackRequest = new Protobuf.RollbackRequestToProto();
+    this.rollbackResponse = new Protobuf.RollbackResponseFromProto();
+
+    this.runQueryRequest = new Protobuf.RunQueryRequestToProto(projectId);
+    this.runQueryResponse = new Protobuf.RunQueryResponseFromProto();
+
+    this.commitRequest = new Protobuf.CommitRequestToProto(projectId);
+    this.commitResponse = new Protobuf.CommitResponseFromProto();
+
+    this.allocateIdsRequest = new Protobuf.AllocateIdsRequestToProto(projectId);
+    this.allocateIdsResponse = new Protobuf.AllocateIdsResponseFromProto();
+
+    this.lookupRequest = new Protobuf.LookupRequestToProto(projectId);
+    this.lookupResponse = new Protobuf.LookupResponseFromProto();
+
+    this.beginTransactionRequest = new Protobuf.BeginTransactionRequestToProto(projectId);
+    this.beginTransactionResponse = new Protobuf.BeginTransactionResponseFromProto();
   }
 
   @Override
@@ -95,7 +132,8 @@ public class CoreDatalockClient implements DatalockClient {
   public CompletableFuture<TransactionResult> rollback(final Transaction txn) {
     final RollbackRequest request = new RollbackRequest(txn);
 
-    return request(DatastoreGrpc.DatastoreStub::rollback, request.toPb(), RollbackResponse::fromPb);
+    return request(DatastoreGrpc.DatastoreStub::rollback, rollbackRequest.apply(request),
+        rollbackResponse.andThen(r -> new RollbackResponse()));
   }
 
   @Override
@@ -114,8 +152,8 @@ public class CoreDatalockClient implements DatalockClient {
   ) {
     final RunQueryRequest request = new RunQueryRequest(query, readOptions, partitionId);
 
-    return request(DatastoreGrpc.DatastoreStub::runQuery, request.toPb(projectId),
-        RunQueryResponse::fromPb);
+    return request(DatastoreGrpc.DatastoreStub::runQuery, runQueryRequest.apply(request),
+        runQueryResponse);
   }
 
   @Override
@@ -126,16 +164,16 @@ public class CoreDatalockClient implements DatalockClient {
         transaction.isPresent() ? CommitRequest.Mode.TRANSACTIONAL
             : CommitRequest.Mode.NON_TRANSACTIONAL);
 
-    return request(DatastoreGrpc.DatastoreStub::commit, request.toPb(projectId),
-        CommitResponse::fromPb);
+    return request(DatastoreGrpc.DatastoreStub::commit, commitRequest.apply(request),
+        commitResponse);
   }
 
   @Override
   public CompletableFuture<AllocateIdsResponse> allocateIds(final List<Key> keys) {
     final AllocateIdsRequest request = new AllocateIdsRequest(keys);
 
-    return request(DatastoreGrpc.DatastoreStub::allocateIds, request.toPb(projectId),
-        AllocateIdsResponse::fromPb);
+    return request(DatastoreGrpc.DatastoreStub::allocateIds, allocateIdsRequest.apply(request),
+        allocateIdsResponse);
   }
 
   @Override
@@ -149,8 +187,8 @@ public class CoreDatalockClient implements DatalockClient {
   ) {
     final LookupRequest request = new LookupRequest(keys, readOptions);
 
-    return request(DatastoreGrpc.DatastoreStub::lookup, request.toPb(projectId),
-        LookupResponse::fromPb);
+    return request(DatastoreGrpc.DatastoreStub::lookup, lookupRequest.apply(request),
+        lookupResponse);
   }
 
   @Override
@@ -281,7 +319,7 @@ public class CoreDatalockClient implements DatalockClient {
 
   private <Request, ProtoResponse, Response> CompletableFuture<Response> request(
       final GrpcCall<Request, ProtoResponse> call, Request request,
-      final Function<ProtoResponse, Response> transform
+      final Function<ProtoResponse, ? extends Response> transform
   ) {
     incrementRef();
 
@@ -335,8 +373,9 @@ public class CoreDatalockClient implements DatalockClient {
   private CompletableFuture<Transaction> beginTransaction() {
     final BeginTransactionRequest request = new BeginTransactionRequest();
 
-    return request(DatastoreGrpc.DatastoreStub::beginTransaction, request.toPb(projectId),
-        r -> new Transaction(r.getTransaction()));
+    return request(DatastoreGrpc.DatastoreStub::beginTransaction,
+        beginTransactionRequest.apply(request),
+        beginTransactionResponse.andThen(BeginTransactionResponse::getTransaction));
   }
 
   public interface ThrowingFunction<A, B> {

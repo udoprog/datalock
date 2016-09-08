@@ -1,14 +1,15 @@
 package eu.toolchain.datalock;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Timestamp;
-import lombok.Data;
-
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+
 public interface Value {
-  boolean excludeFromIndexes();
+  boolean isExcludeFromIndexes();
 
   Value withExcludeFromIndexes(boolean excludeFromIndexes);
 
@@ -30,11 +31,11 @@ public interface Value {
     return new KeyValue(value, excludeFromIndexes);
   }
 
-  static BlobValue fromBlob(final ByteString value) {
+  static BlobValue fromBlob(final ByteBuffer value) {
     return new BlobValue(value);
   }
 
-  static BlobValue fromBlob(final ByteString value, final boolean excludeFromIndexes) {
+  static BlobValue fromBlob(final ByteBuffer value, final boolean excludeFromIndexes) {
     return new BlobValue(value, excludeFromIndexes);
   }
 
@@ -122,11 +123,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public EntityValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new EntityValue(entity, excludeFromIndexes);
     }
@@ -139,15 +135,6 @@ public interface Value {
     @Override
     public <T> T visit(final Visitor<T> visitor) {
       return visitor.visitEntity(this);
-    }
-
-    @Override
-    public com.google.datastore.v1.Value toPb() {
-      return com.google.datastore.v1.Value
-          .newBuilder()
-          .setEntityValue(entity.toPb())
-          .setExcludeFromIndexes(excludeFromIndexes)
-          .build();
     }
 
     @Override
@@ -171,11 +158,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public StringValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new StringValue(value, excludeFromIndexes);
     }
@@ -183,15 +165,6 @@ public interface Value {
     @Override
     public <T> T visit(final Visitor<T> visitor) {
       return visitor.visitString(this);
-    }
-
-    @Override
-    public com.google.datastore.v1.Value toPb() {
-      return com.google.datastore.v1.Value
-          .newBuilder()
-          .setStringValue(value)
-          .setExcludeFromIndexes(excludeFromIndexes)
-          .build();
     }
 
     @Override
@@ -215,11 +188,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public KeyValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new KeyValue(value, excludeFromIndexes);
     }
@@ -230,15 +198,6 @@ public interface Value {
     }
 
     @Override
-    public com.google.datastore.v1.Value toPb() {
-      return com.google.datastore.v1.Value
-          .newBuilder()
-          .setKeyValue(value.toPb())
-          .setExcludeFromIndexes(excludeFromIndexes)
-          .build();
-    }
-
-    @Override
     public String toString() {
       return "<key:" + value + ">";
     }
@@ -246,21 +205,16 @@ public interface Value {
 
   @Data
   class BlobValue implements Value {
-    final ByteString value;
+    final ByteBuffer value;
     final boolean excludeFromIndexes;
 
-    public BlobValue(final ByteString value) {
+    public BlobValue(final ByteBuffer value) {
       this(value, false);
     }
 
-    public BlobValue(final ByteString value, final boolean excludeFromIndexes) {
+    public BlobValue(final ByteBuffer value, final boolean excludeFromIndexes) {
       this.value = value;
       this.excludeFromIndexes = excludeFromIndexes;
-    }
-
-    @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
     }
 
     @Override
@@ -271,15 +225,6 @@ public interface Value {
     @Override
     public <T> T visit(final Visitor<T> visitor) {
       return visitor.visitBlob(this);
-    }
-
-    @Override
-    public com.google.datastore.v1.Value toPb() {
-      return com.google.datastore.v1.Value
-          .newBuilder()
-          .setBlobValue(value)
-          .setExcludeFromIndexes(excludeFromIndexes)
-          .build();
     }
 
     @Override
@@ -303,11 +248,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public ArrayValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new ArrayValue(values, excludeFromIndexes);
     }
@@ -315,20 +255,6 @@ public interface Value {
     @Override
     public <T> T visit(final Visitor<T> visitor) {
       return visitor.visitArray(this);
-    }
-
-    @Override
-    public com.google.datastore.v1.Value toPb() {
-      final com.google.datastore.v1.Value.Builder valueBuilder =
-          com.google.datastore.v1.Value.newBuilder();
-      com.google.datastore.v1.ArrayValue.Builder array =
-          com.google.datastore.v1.ArrayValue.newBuilder();
-      values.stream().map(Value::toPb).forEach(array::addValues);
-
-      return valueBuilder
-          .setArrayValue(array.build())
-          .setExcludeFromIndexes(excludeFromIndexes)
-          .build();
     }
 
     @Override
@@ -352,11 +278,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public IntegerValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new IntegerValue(value, excludeFromIndexes);
     }
@@ -364,11 +285,6 @@ public interface Value {
     @Override
     public <T> T visit(final Visitor<T> visitor) {
       return visitor.visitInteger(this);
-    }
-
-    @Override
-    public com.google.datastore.v1.Value toPb() {
-      return com.google.datastore.v1.Value.newBuilder().setIntegerValue(value).build();
     }
 
     @Override
@@ -392,11 +308,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public DoubleValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new DoubleValue(value, excludeFromIndexes);
     }
@@ -407,11 +318,6 @@ public interface Value {
     }
 
     @Override
-    public com.google.datastore.v1.Value toPb() {
-      return com.google.datastore.v1.Value.newBuilder().setDoubleValue(value).build();
-    }
-
-    @Override
     public String toString() {
       return "<double:" + value + ">";
     }
@@ -419,6 +325,7 @@ public interface Value {
 
   @Data
   class BooleanValue implements Value {
+    @Getter(AccessLevel.NONE)
     final boolean value;
     final boolean excludeFromIndexes;
 
@@ -436,11 +343,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public BooleanValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new BooleanValue(value, excludeFromIndexes);
     }
@@ -448,11 +350,6 @@ public interface Value {
     @Override
     public <T> T visit(final Visitor<T> visitor) {
       return visitor.visitBoolean(this);
-    }
-
-    @Override
-    public com.google.datastore.v1.Value toPb() {
-      return com.google.datastore.v1.Value.newBuilder().setBooleanValue(value).build();
     }
 
     @Override
@@ -480,11 +377,6 @@ public interface Value {
     }
 
     @Override
-    public boolean excludeFromIndexes() {
-      return excludeFromIndexes;
-    }
-
-    @Override
     public TimestampValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return new TimestampValue(seconds, nanos, excludeFromIndexes);
     }
@@ -495,20 +387,8 @@ public interface Value {
     }
 
     @Override
-    public com.google.datastore.v1.Value toPb() {
-      final Timestamp.Builder ts = Timestamp.newBuilder();
-      ts.setSeconds(seconds);
-      ts.setNanos(nanos);
-      return com.google.datastore.v1.Value.newBuilder().setTimestampValue(ts.build()).build();
-    }
-
-    @Override
     public String toString() {
       return "<timestamp:" + seconds + ":" + nanos + ">";
-    }
-
-    public static Value fromPb(final Timestamp timestamp, final boolean excludeFromIndexes) {
-      return null;
     }
   }
 
@@ -517,7 +397,7 @@ public interface Value {
     public static NullValue INSTANCE = new NullValue();
 
     @Override
-    public boolean excludeFromIndexes() {
+    public boolean isExcludeFromIndexes() {
       return false;
     }
 
@@ -529,11 +409,6 @@ public interface Value {
     @Override
     public NullValue withExcludeFromIndexes(final boolean excludeFromIndexes) {
       return this;
-    }
-
-    @Override
-    public com.google.datastore.v1.Value toPb() {
-      throw new RuntimeException(this + ": cannot be serialized");
     }
 
     @Override

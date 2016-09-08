@@ -1,15 +1,13 @@
 package eu.toolchain.datalock;
 
-import lombok.Data;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.Data;
+
 public interface Entity {
   Map<String, Value> getProperties();
-
-  com.google.datastore.v1.Entity toPb();
 
   KeyedEntity withKey(Key key);
 
@@ -74,24 +72,6 @@ public interface Entity {
     public <T> T visit(final Visitor<? extends T> visitor) {
       return visitor.visitEmbedded(this);
     }
-
-    public static EmbeddedEntity fromPb(final com.google.datastore.v1.Entity pb) {
-      final Map<String, Value> properties = new HashMap<>();
-
-      final Optional<Key> key;
-
-      if (pb.hasKey()) {
-        throw new IllegalStateException("Embedded entities do not have keys");
-      }
-
-      for (final Map.Entry<String, com.google.datastore.v1.Value> property : pb
-          .getProperties()
-          .entrySet()) {
-        properties.put(property.getKey(), Value.fromPb(property.getValue()));
-      }
-
-      return new EmbeddedEntity(properties);
-    }
   }
 
   @Data
@@ -124,24 +104,6 @@ public interface Entity {
     @Override
     public <T> T visit(final Visitor<? extends T> visitor) {
       return visitor.visitKeyed(this);
-    }
-
-    public void stuff() {
-      final Map<String, Value> properties = new HashMap<>();
-
-      if (!pb.hasKey()) {
-        throw new IllegalStateException("Expected key");
-      }
-
-      final Key key = Key.fromPb(pb.getKey());
-
-      for (final Map.Entry<String, com.google.datastore.v1.Value> property : pb
-          .getProperties()
-          .entrySet()) {
-        properties.put(property.getKey(), Value.fromPb(property.getValue()));
-      }
-
-      return new KeyedEntity(key, properties);
     }
   }
 }

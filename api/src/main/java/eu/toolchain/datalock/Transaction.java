@@ -1,9 +1,10 @@
 package eu.toolchain.datalock;
 
-import com.google.protobuf.ByteString;
+import java.nio.ByteBuffer;
+
 import lombok.Data;
 
 @Data
 public class Transaction {
-  private final ByteString bytes;
+  private final ByteBuffer bytes;
 }

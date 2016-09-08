@@ -1,12 +1,11 @@
 package eu.toolchain.datalock;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Int32Value;
-import lombok.Data;
-
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import lombok.Data;
 
 @Data
 public class Query {
@@ -15,32 +14,8 @@ public class Query {
   private final List<PropertyOrder> order;
   private final Optional<String> kind;
   private final Optional<Integer> limit;
-  private final Optional<ByteString> startCursor;
-  private final Optional<ByteString> endCursor;
-
-  public com.google.datastore.v1.Query toPb() {
-    final com.google.datastore.v1.Query.Builder builder =
-        com.google.datastore.v1.Query.newBuilder();
-
-    filter.ifPresent(f -> builder.setFilter(f.toPb()));
-
-    distinctOn
-        .stream()
-        .map(g -> com.google.datastore.v1.PropertyReference.newBuilder().setName(g).build())
-        .forEach(builder::addDistinctOn);
-
-    order.stream().map(PropertyOrder::toPb).forEach(builder::addOrder);
-
-    kind.ifPresent(k -> builder.addKind(
-        com.google.datastore.v1.KindExpression.newBuilder().setName(k).build()));
-
-    startCursor.ifPresent(builder::setStartCursor);
-    endCursor.ifPresent(builder::setEndCursor);
-
-    limit.map(i -> Int32Value.newBuilder().setValue(i).build()).ifPresent(builder::setLimit);
-
-    return builder.build();
-  }
+  private final Optional<ByteBuffer> startCursor;
+  private final Optional<ByteBuffer> endCursor;
 
   public static Builder builder() {
     return new Builder();
@@ -52,8 +27,8 @@ public class Query {
     private List<PropertyOrder> order = new ArrayList<>();
     private Optional<String> kind = Optional.empty();
     private Optional<Integer> limit = Optional.empty();
-    private Optional<ByteString> startCursor = Optional.empty();
-    private Optional<ByteString> endCursor = Optional.empty();
+    private Optional<ByteBuffer> startCursor = Optional.empty();
+    private Optional<ByteBuffer> endCursor = Optional.empty();
 
     public Builder filter(final Filter filter) {
       this.filter = Optional.of(filter);
@@ -80,12 +55,12 @@ public class Query {
       return this;
     }
 
-    public Builder startCursor(final ByteString startCursor) {
+    public Builder startCursor(final ByteBuffer startCursor) {
       this.startCursor = Optional.of(startCursor);
       return this;
     }
 
-    public Builder endCursor(final ByteString endCursor) {
+    public Builder endCursor(final ByteBuffer endCursor) {
       this.endCursor = Optional.of(endCursor);
       return this;
     }
